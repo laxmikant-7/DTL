@@ -1,15 +1,19 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { type IStorage } from "./db-storage";
 import { setupAuth } from "./auth";
 import { complaintFormSchema, complaintStatuses } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(
   httpServer: Server,
-  app: Express
+  app: Express,
+  storage?: IStorage
 ): Promise<Server> {
-  setupAuth(app);
+  if (!storage) {
+    throw new Error("Storage is required");
+  }
+  setupAuth(app, storage);
 
   app.get("/api/complaints", async (req, res) => {
     if (!req.isAuthenticated()) {
